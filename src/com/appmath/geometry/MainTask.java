@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class Main {
+public class MainTask {
 
     private static MyFileWorker fileWorker = new MyFileWorker();
     private static GeometryTask task = new GeometryTask();
@@ -25,15 +25,12 @@ public class Main {
             throw new FileNotFoundException(inputFileName);
         }
 
-        String outputFileNameFirst = in.next();
-        String outputFileNameSecond = in.next();
-
         // Worker part
         fileWorker.readDataFile(inputFileName);
         task.setPoints(fileWorker.getPoints());
-        task.solveTaskBySquare();
-        task.solveTaskByPerimeter();
-        fileWorker.writeDataFile(outputFileNameFirst, task.getAnswerForSquare());
-        fileWorker.writeDataFile(outputFileNameSecond, task.getAnswerForPerimeter());
+        task.solveTaskForSquare();
+        task.solveTaskForPerimeter();
+        fileWorker.writeDataFile("minSquare.txt", task.getAnswerForSquare());
+        fileWorker.writeDataFile("minPerimeter.txt", task.getAnswerForPerimeter());
     }
 }
