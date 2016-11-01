@@ -5,10 +5,9 @@ import com.appmath.custom.MyPoint2D;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import static com.appmath.custom.MyLine.buildLineByOnePoint;
-import static com.appmath.custom.MyLine.buildLineByTwoPoints;
-import static com.appmath.custom.MyLine.findAngleBetweenLines;
+import static com.appmath.custom.MyLine.*;
 
 public class GeometryTask {
 
@@ -18,19 +17,24 @@ public class GeometryTask {
 
     private static final int NUMBER_RECTANGLE_POINTS = 4;
 
+    private class RectangleCharacteristics {
+        BigInteger square;
+        BigInteger perimeter;
+    }
+
     public void setPoints(ArrayList<MyPoint2D> points) {
         this.points = points;
     }
 
     public String getAnswerForSquare() {
-        return answerForSquare.toString();
+        return Arrays.toString(answerForSquare);
     }
 
     public String getAnswerForPerimeter() {
-        return answerForPerimeter.toString();
+        return Arrays.toString(answerForPerimeter);
     }
 
-    private int[] findEndpoints() {
+    private int[] findStartEndpoints() {
         int pointsListSize = points.size();
         int[] endpointNumbers = {0, 0, 0, 0};
         BigInteger minX = points.get(0).getX(), maxX = points.get(0).getX();
@@ -55,7 +59,7 @@ public class GeometryTask {
         return endpointNumbers;
     }
 
-    private float[] findAngles(int[] endpoints) {
+    private float[] findStartAngles(int[] endpoints) {
         float[] angleSizeArray = new float[NUMBER_RECTANGLE_POINTS];
         for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
             int numEndpoint = endpoints[i];
@@ -77,6 +81,7 @@ public class GeometryTask {
             if (angles[i] < minAngle)
                 minAngle = angles[i];
         }
+        return minAngle;
     }
 
     private int recountAngles(float[] angles, float minAngle) {
@@ -91,52 +96,81 @@ public class GeometryTask {
         return index;
     }
 
-    private void recountEndpoints(int[] endpoints) {
-        for (int i = 0; i < endpoints.length; i++) {
-            int numEndpoint = endpoints[i];
-            endpoints[i] = numEndpoint > 0 ? numEndpoint - 1 : points.size() - 1;
-        }
+    private void recountEndpointAndAngle(int[] endpoints, float[] angle, int index) {
+        int numEndpoint = endpoints[index];
+        endpoints[index] = numEndpoint > 0 ? numEndpoint - 1 : points.size() - 1;
+
+        MyPoint2D firstPoint = points.get(numEndpoint);
+        MyPoint2D secondPoint = points.get(endpoints[index]);
+        MyLine firstLine = buildLineByTwoPoints(firstPoint, secondPoint);
+
+        int numNextPoint = endpoints[index] > 0 ? numEndpoint - 1 : points.size() - 1;
+        firstPoint = secondPoint;
+        secondPoint = points.get(numNextPoint);
+        MyLine secondLine = buildLineByTwoPoints(firstPoint, secondPoint);
+        angle[index] = findAngleBetweenLines(firstLine, secondLine);
     }
 
-    private BigInteger countRectangleSquare(int[] endpoints, int indexOfBearingPoint) {
-        BigInteger square = BigInteger.ZERO;
+    private RectangleCharacteristics countRectangleCharacteristics(int[] endpoints, int indexOfBearingPoint) {
+        // find pair of calipers, which include endpoint
         int bearingEndpoint = endpoints[indexOfBearingPoint];
-        int parallelBearingEndpoint = (indexOfBearingPoint % 2 == 0) ? indexOfBearingPoint + 1 : indexOfBearingPoint - 1;
+        int parallelBearingEndpointIndex = (indexOfBearingPoint % 2 == 0) ? indexOfBearingPoint + 1 : indexOfBearingPoint - 1;
         MyPoint2D firstPoint = points.get(bearingEndpoint);
         MyPoint2D secondPoint = bearingEndpoint > 0 ? points.get(bearingEndpoint - 1) : points.get(points.size() - 1);
         MyLine bearingLine = buildLineByTwoPoints(firstPoint, secondPoint);
-        MyPoint2D tmpPoint = points.get(parallelBearingEndpoint);
+        MyPoint2D tmpPoint = points.get(endpoints[parallelBearingEndpointIndex]);
         MyLine parallelBearingLine = buildParallelLineByOnePoint(bearingLine, tmpPoint);
-        //MyLine line;
-        //MyLine line;
-        // найти два отрезка
-        // посчитать площадь
-        return square;
+
+        // find pair of perpendicular calipers
+        int tmpEndpointIndex = indexOfBearingPoint > 1 ? 2 : 0;
+        tmpPoint = points.get(endpoints[tmpEndpointIndex]);
+        MyLine firstPerpendicularLine = buildPerpendicularLineByOnePoint(bearingLine, tmpPoint);
+        tmpPoint = points.get(endpoints[tmpEndpointIndex + 1]);
+        MyLine secondPerpendicularLine = buildPerpendicularLineByOnePoint(bearingLine, tmpPoint);
+
+        // find rectangle's sides
+        BigInteger lengthOfFirstInterval = countIntervalLength(bearingLine, firstPerpendicularLine, secondPerpendicularLine);
+        BigInteger lengthOfSecondInterval = countIntervalLength(firstPerpendicularLine, bearingLine, parallelBearingLine);
+
+        // count rectangle's square and perimeter
+        RectangleCharacteristics rectangle = new RectangleCharacteristics();
+        rectangle.square = lengthOfFirstInterval.multiply(lengthOfSecondInterval);
+        rectangle.perimeter = (lengthOfFirstInterval.add(lengthOfSecondInterval)).multiply(BigInteger.valueOf(2));
+        return rectangle;
     }
 
-    public void solveTaskForSquare() {
-        int[] endpoints = findEndpoints();
-        int tmpEndpoint = endpoints[0];
-        float[] angles = findAngles(endpoints);
+    public void solveTask() {
+        int[] endpoints = findStartEndpoints();
+        float[] angles = findStartAngles(endpoints);
+        int tmpEndpointFirst = endpoints[0], tmpEndpointSecond = endpoints[1];
+
         BigInteger minSquare = BigInteger.ZERO;
-        int[] minEndpoints = new int[NUMBER_RECTANGLE_POINTS];
+        BigInteger minPerimeter = BigInteger.ZERO;
+        int[] minSquareEndpoints = new int[NUMBER_RECTANGLE_POINTS];
+        int[] minPerimeterEndpoints = new int[NUMBER_RECTANGLE_POINTS];
+
         do {
             float minAngle = findMinAngle(angles);
             int indexOfMinAngle = recountAngles(angles, minAngle);
-            BigInteger rectSquare = countRectangleSquare(endpoints, indexOfMinAngle);
-            if (rectSquare.compareTo(minSquare) < 0) {
+            RectangleCharacteristics rect = countRectangleCharacteristics(endpoints, indexOfMinAngle);
+            BigInteger rectSquare = rect.square;
+            BigInteger rectPerimeter = rect.perimeter;
+            if (rectSquare.compareTo(minSquare) < 0 || minSquare.equals(BigInteger.ZERO)) {
                 minSquare = rectSquare;
-                System.arraycopy(endpoints, 0, minEndpoints, 0, endpoints.length);
+                System.arraycopy(endpoints, 0, minSquareEndpoints, 0, endpoints.length);
             }
-            recountEndpoints(endpoints);
-        } while (endpoints[0] != tmpEndpoint);
+
+            if (rectPerimeter.compareTo(minPerimeter) < 0 || minPerimeter.equals(BigInteger.ZERO)) {
+                minPerimeter = rectPerimeter;
+                System.arraycopy(endpoints, 0, minPerimeterEndpoints, 0, endpoints.length);
+            }
+
+            recountEndpointAndAngle(endpoints, angles, indexOfMinAngle);
+        } while ((endpoints[1] != tmpEndpointFirst) && (endpoints[0] != tmpEndpointSecond));
 
         for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
-            answerForSquare[i] = points.get(minEndpoints[i]);
+            answerForSquare[i] = points.get(minSquareEndpoints[i]);
+            answerForPerimeter[i] = points.get(minPerimeterEndpoints[i]);
         }
-    }
-
-    public void solveTaskForPerimeter() {
-        //answerForPerimeter = points;
     }
 }

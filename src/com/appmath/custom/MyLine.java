@@ -2,6 +2,7 @@ package com.appmath.custom;
 
 import java.math.BigInteger;
 
+import static com.appmath.custom.MyPoint2D.countDistance;
 import static com.appmath.custom.MyPoint2D.sqrt;
 
 public class MyLine {
@@ -45,13 +46,40 @@ public class MyLine {
         return new MyLine(a, b);
     }
 
+    public static MyLine buildParallelLineByOnePoint(MyLine l, MyPoint2D p) {
+        BigInteger x = p.getX(), y = p.getY();
+        BigInteger a = l.getA();
+        BigInteger b = y.min(a.multiply(x));
+        return new MyLine(a, b);
+    }
+
+    public static MyLine buildPerpendicularLineByOnePoint(MyLine l, MyPoint2D p) {
+        BigInteger x = p.getX(), y = p.getY();
+        BigInteger a = BigInteger.ONE.divide(l.getA()).negate();
+        BigInteger b = y.min(a.multiply(x));
+        return new MyLine(a, b);
+    }
+
+    private static MyPoint2D findLinesIntersection(MyLine l1, MyLine l2) {
+        BigInteger a1 = l1.getA(), a2 = l2.getA();
+        BigInteger b1 = l1.getB(), b2 = l2.getB();
+        BigInteger x = ((b1.add(b2)).divide(a1.add(a2))).negate();
+        BigInteger y = a1.multiply(x).add(b1);
+        return new MyPoint2D(x, y);
+    }
+
+    public  static BigInteger countIntervalLength(MyLine l, MyLine l1, MyLine l2) {
+        MyPoint2D firstPoint = findLinesIntersection(l, l1);
+        MyPoint2D secondPoint = findLinesIntersection(l, l2);
+        return  countDistance(firstPoint, secondPoint);
+    }
+
     public static float findAngleBetweenLines(MyLine l1, MyLine l2) {
         BigInteger a1 = l1.getA(), a2 = l2.getA();
         BigInteger b1 = l1.getB(), b2 = l2.getB();
         BigInteger firstPart = ((a1.multiply(a2)).add(b1.multiply(b2)));
         BigInteger secondPart = (sqrt(a1.pow(2)).add(b1.pow(2))).multiply(sqrt((a2.pow(2)).add(b2.pow(2))));
         double cosAngle = firstPart.divide(secondPart).doubleValue();
-        float angle = (float) Math.acos(cosAngle);
-        return angle;
+        return (float) Math.acos(cosAngle);
     }
 }

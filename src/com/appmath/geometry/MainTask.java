@@ -28,8 +28,7 @@ public class MainTask {
         // Worker part
         fileWorker.readDataFile(inputFileName);
         task.setPoints(fileWorker.getPoints());
-        task.solveTaskForSquare();
-        task.solveTaskForPerimeter();
+        task.solveTask();
         fileWorker.writeDataFile("minSquare.txt", task.getAnswerForSquare());
         fileWorker.writeDataFile("minPerimeter.txt", task.getAnswerForPerimeter());
     }
