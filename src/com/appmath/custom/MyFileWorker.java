@@ -6,29 +6,30 @@ import java.util.ArrayList;
 
 public class MyFileWorker {
 
-    private ArrayList<MyPoint2D> points = null;
+    private ArrayList<MyPoint2D> points = new ArrayList<>();
 
     public ArrayList<MyPoint2D> getPoints() {
         return points;
     }
 
     private void convertTextToPoints(String inputText) {
-        char[] lineArray  = inputText.toCharArray();
         int i = 0;
         BigInteger x = BigInteger.ZERO;
         BigInteger y = BigInteger.ZERO;
-        while (lineArray[i] != 0) {
-            if (lineArray[i] == ',') {
+        int textLength = inputText.length();
+        while (i < textLength) {
+            char currentSymbol = inputText.charAt(i);
+            if (currentSymbol == ',') {
                 x = y;
                 y = BigInteger.ZERO;
             }
-            else if (lineArray[i] == '\n') {
+            else if (currentSymbol == '\n') {
                 points.add(new MyPoint2D(x, y));
                 x = BigInteger.ZERO;
                 y = BigInteger.ZERO;
             }
-            else if (lineArray[i] >= '0' && lineArray[i] <= '9') {
-                int number = lineArray[i] - '0';
+            else if (currentSymbol  >= '0' && currentSymbol <= '9') {
+                int number = currentSymbol - '0';
                 y = y.multiply(BigInteger.TEN);
                 y = y.add(BigInteger.valueOf(number));
             }
