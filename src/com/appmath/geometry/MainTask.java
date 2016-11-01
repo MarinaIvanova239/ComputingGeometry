@@ -12,14 +12,8 @@ public class MainTask {
     private static GeometryTask task = new GeometryTask();
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner in = new Scanner(System.in);
-        if (!in.hasNext()) {
-            System.out.println("You should write file's name as an argument!");
-            return;
-        }
-
         // Parse arguments
-        String inputFileName = in.next();
+        String inputFileName = args[0];
         File inputFile = new File(inputFileName);
         if (!inputFile.exists()) {
             throw new FileNotFoundException(inputFileName);
