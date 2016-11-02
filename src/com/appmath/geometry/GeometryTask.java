@@ -5,7 +5,6 @@ import com.appmath.custom.MyPoint2D;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static com.appmath.custom.MyLine.*;
 
@@ -20,18 +19,19 @@ public class GeometryTask {
     private class RectangleCharacteristics {
         BigInteger square;
         BigInteger perimeter;
+        MyPoint2D[] points = new MyPoint2D[NUMBER_RECTANGLE_POINTS];
     }
 
     public void setPoints(ArrayList<MyPoint2D> points) {
         this.points = points;
     }
 
-    public String getAnswerForSquare() {
-        return Arrays.toString(answerForSquare);
+    public MyPoint2D[] getAnswerForSquare() {
+        return answerForSquare;
     }
 
-    public String getAnswerForPerimeter() {
-        return Arrays.toString(answerForPerimeter);
+    public MyPoint2D[] getAnswerForPerimeter() {
+        return answerForPerimeter;
     }
 
     private int[] findStartEndpoints() {
@@ -104,7 +104,7 @@ public class GeometryTask {
         MyPoint2D secondPoint = points.get(endpoints[index]);
         MyLine firstLine = buildLineByTwoPoints(firstPoint, secondPoint);
 
-        int numNextPoint = endpoints[index] > 0 ? numEndpoint - 1 : points.size() - 1;
+        int numNextPoint = endpoints[index] > 0 ? endpoints[index] - 1 : points.size() - 1;
         firstPoint = secondPoint;
         secondPoint = points.get(numNextPoint);
         MyLine secondLine = buildLineByTwoPoints(firstPoint, secondPoint);
@@ -122,7 +122,7 @@ public class GeometryTask {
         MyLine parallelBearingLine = buildParallelLineByOnePoint(bearingLine, tmpPoint);
 
         // find pair of perpendicular calipers
-        int tmpEndpointIndex = indexOfBearingPoint > 1 ? 2 : 0;
+        int tmpEndpointIndex = indexOfBearingPoint > 1 ? 0 : 2;
         tmpPoint = points.get(endpoints[tmpEndpointIndex]);
         MyLine firstPerpendicularLine = buildPerpendicularLineByOnePoint(bearingLine, tmpPoint);
         tmpPoint = points.get(endpoints[tmpEndpointIndex + 1]);
@@ -136,6 +136,12 @@ public class GeometryTask {
         RectangleCharacteristics rectangle = new RectangleCharacteristics();
         rectangle.square = lengthOfFirstInterval.multiply(lengthOfSecondInterval);
         rectangle.perimeter = (lengthOfFirstInterval.add(lengthOfSecondInterval)).multiply(BigInteger.valueOf(2));
+
+        // find rectangles points
+        rectangle.points[0] = findLinesIntersection(bearingLine, firstPerpendicularLine);
+        rectangle.points[1] = findLinesIntersection(firstPerpendicularLine, parallelBearingLine);
+        rectangle.points[2] = findLinesIntersection(parallelBearingLine, secondPerpendicularLine);
+        rectangle.points[3] = findLinesIntersection(secondPerpendicularLine, bearingLine);
         return rectangle;
     }
 
@@ -146,8 +152,8 @@ public class GeometryTask {
 
         BigInteger minSquare = BigInteger.ZERO;
         BigInteger minPerimeter = BigInteger.ZERO;
-        int[] minSquareEndpoints = new int[NUMBER_RECTANGLE_POINTS];
-        int[] minPerimeterEndpoints = new int[NUMBER_RECTANGLE_POINTS];
+        MyPoint2D[] minSquarePoints = new MyPoint2D[NUMBER_RECTANGLE_POINTS];
+        MyPoint2D[] minPerimeterPoints = new MyPoint2D[NUMBER_RECTANGLE_POINTS];
 
         do {
             float minAngle = findMinAngle(angles);
@@ -157,20 +163,18 @@ public class GeometryTask {
             BigInteger rectPerimeter = rect.perimeter;
             if (rectSquare.compareTo(minSquare) < 0 || minSquare.equals(BigInteger.ZERO)) {
                 minSquare = rectSquare;
-                System.arraycopy(endpoints, 0, minSquareEndpoints, 0, endpoints.length);
+                System.arraycopy(rect.points, 0, minSquarePoints, 0, endpoints.length);
             }
 
             if (rectPerimeter.compareTo(minPerimeter) < 0 || minPerimeter.equals(BigInteger.ZERO)) {
                 minPerimeter = rectPerimeter;
-                System.arraycopy(endpoints, 0, minPerimeterEndpoints, 0, endpoints.length);
+                System.arraycopy(rect.points, 0, minPerimeterPoints, 0, endpoints.length);
             }
 
             recountEndpointAndAngle(endpoints, angles, indexOfMinAngle);
         } while ((endpoints[1] != tmpEndpointFirst) && (endpoints[0] != tmpEndpointSecond));
 
-        for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
-            answerForSquare[i] = points.get(minSquareEndpoints[i]);
-            answerForPerimeter[i] = points.get(minPerimeterEndpoints[i]);
-        }
+        System.arraycopy(minSquarePoints, 0, answerForSquare, 0, endpoints.length);
+        System.arraycopy(minPerimeterPoints, 0, answerForPerimeter, 0, endpoints.length);
     }
 }

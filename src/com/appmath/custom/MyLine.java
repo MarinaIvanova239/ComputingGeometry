@@ -3,7 +3,6 @@ package com.appmath.custom;
 import java.math.BigInteger;
 
 import static com.appmath.custom.MyPoint2D.countDistance;
-import static com.appmath.custom.MyPoint2D.sqrt;
 
 public class MyLine {
 
@@ -55,12 +54,15 @@ public class MyLine {
 
     public static MyLine buildPerpendicularLineByOnePoint(MyLine l, MyPoint2D p) {
         BigInteger x = p.getX(), y = p.getY();
+        if (l.getA().equals(BigInteger.ZERO)) {
+            return new MyLine(x, BigInteger.ZERO);
+        }
         BigInteger a = BigInteger.ONE.divide(l.getA()).negate();
         BigInteger b = y.min(a.multiply(x));
         return new MyLine(a, b);
     }
 
-    private static MyPoint2D findLinesIntersection(MyLine l1, MyLine l2) {
+    public static MyPoint2D findLinesIntersection(MyLine l1, MyLine l2) {
         BigInteger a1 = l1.getA(), a2 = l2.getA();
         BigInteger b1 = l1.getB(), b2 = l2.getB();
         BigInteger x = ((b1.add(b2)).divide(a1.add(a2))).negate();
@@ -71,14 +73,16 @@ public class MyLine {
     public  static BigInteger countIntervalLength(MyLine l, MyLine l1, MyLine l2) {
         MyPoint2D firstPoint = findLinesIntersection(l, l1);
         MyPoint2D secondPoint = findLinesIntersection(l, l2);
-        return  countDistance(firstPoint, secondPoint);
+        return countDistance(firstPoint, secondPoint);
     }
 
     public static float findAngleBetweenLines(MyLine l1, MyLine l2) {
         BigInteger a1 = l1.getA(), a2 = l2.getA();
         BigInteger b1 = l1.getB(), b2 = l2.getB();
         BigInteger firstPart = ((a1.multiply(a2)).add(b1.multiply(b2)));
-        BigInteger secondPart = (sqrt(a1.pow(2)).add(b1.pow(2))).multiply(sqrt((a2.pow(2)).add(b2.pow(2))));
+        BigInteger tmp1 = (a1.pow(2)).add(b1.pow(2));
+        BigInteger tmp2 = (a2.pow(2)).add(b2.pow(2));
+        BigInteger secondPart = BigInteger.valueOf((long) (Math.sqrt(tmp1.longValue()) * Math.sqrt(tmp2.longValue())));
         double cosAngle = firstPart.divide(secondPart).doubleValue();
         return (float) Math.acos(cosAngle);
     }

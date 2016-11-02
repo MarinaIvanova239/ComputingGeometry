@@ -59,7 +59,17 @@ public class MyFileWorker {
         convertTextToPoints(resultText);
     }
 
-    public void writeDataFile(String outputFileName, String answer) {
+    private String convertPointsToText(MyPoint2D[] points) {
+        String text = new String();
+        for (int i = 0; i < points.length; i++) {
+            text += '(' + points[i].getX().toString() + ',' + points[i].getY().toString() + ')' + '\n';
+        }
+
+        return text;
+    }
+
+    public void writeDataFile(String outputFileName, MyPoint2D[] answerPoints) {
+        String answer = convertPointsToText(answerPoints);
         File file = new File(outputFileName);
         try {
             if(!file.exists()){
