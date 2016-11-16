@@ -1,17 +1,20 @@
 package com.appmath.custom;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import static com.appmath.custom.MyPoint2D.countDistance;
+import java.math.RoundingMode;
 
 public class MyLine {
 
+    // прямые вида ax + by + c = 0
     private BigInteger a = BigInteger.ZERO;
     private BigInteger b = BigInteger.ZERO;
+    private BigInteger c = BigInteger.ZERO;
 
-    public MyLine(BigInteger a, BigInteger b) {
+    public MyLine(BigInteger a, BigInteger b, BigInteger c) {
         this.a = a;
         this.b = b;
+        this.c = c;
     }
 
     public void setA(BigInteger a) {
@@ -22,6 +25,10 @@ public class MyLine {
         this.b = b;
     }
 
+    public void setC(BigInteger c) {
+        this.c = c;
+    }
+
     public BigInteger getA() {
         return a;
     }
@@ -30,60 +37,55 @@ public class MyLine {
         return b;
     }
 
+    public BigInteger getC() {
+        return c;
+    }
+
     public static MyLine buildLineByOnePoint(MyPoint2D p, boolean directionToY) {
         if (directionToY) {
-            return new MyLine(p.getX(), BigInteger.ZERO);
+            return new MyLine(BigInteger.ONE, BigInteger.ZERO, p.getX().negate());
         }
-        return new MyLine(BigInteger.ZERO, p.getY());
+        return new MyLine(BigInteger.ZERO, BigInteger.ONE, p.getY().negate());
     }
 
     public static MyLine buildLineByTwoPoints(MyPoint2D p1, MyPoint2D p2) {
         BigInteger x1 = p1.getX(), x2 = p2.getX();
         BigInteger y1 = p1.getY(), y2 = p2.getY();
-        BigInteger a = (y2.min(y1)).divide(x2.min(x1));
-        BigInteger b = (y1.multiply(x2)).min(x1.multiply(y2)).divide(x2.min(x1));
-        return new MyLine(a, b);
-    }
-
-    public static MyLine buildParallelLineByOnePoint(MyLine l, MyPoint2D p) {
-        BigInteger x = p.getX(), y = p.getY();
-        BigInteger a = l.getA();
-        BigInteger b = y.min(a.multiply(x));
-        return new MyLine(a, b);
+        BigInteger a = y2.subtract(y1);
+        BigInteger b = x2.subtract(x1);
+        BigInteger c = (y1.multiply(x2)).subtract(x1.multiply(y2));
+        return new MyLine(a, b, c);
     }
 
     public static MyLine buildPerpendicularLineByOnePoint(MyLine l, MyPoint2D p) {
         BigInteger x = p.getX(), y = p.getY();
-        if (l.getA().equals(BigInteger.ZERO)) {
-            return new MyLine(x, BigInteger.ZERO);
-        }
-        BigInteger a = BigInteger.ONE.divide(l.getA()).negate();
-        BigInteger b = y.min(a.multiply(x));
-        return new MyLine(a, b);
+        BigInteger a = l.getA(), b = l.getB();
+        BigInteger c = (a.multiply(y)).subtract(b.multiply(x));
+        return new MyLine(b, a.negate(), c);
     }
 
-    public static MyPoint2D findLinesIntersection(MyLine l1, MyLine l2) {
-        BigInteger a1 = l1.getA(), a2 = l2.getA();
-        BigInteger b1 = l1.getB(), b2 = l2.getB();
-        BigInteger x = ((b1.add(b2)).divide(a1.add(a2))).negate();
-        BigInteger y = a1.multiply(x).add(b1);
-        return new MyPoint2D(x, y);
-    }
+    public static BigDecimal countDistanceBetweenLineAndPoint(MyLine l, MyPoint2D p) {
+        BigInteger x = p.getX(), y = p.getY();
+        BigInteger a = l.getA(), b = l.getB(), c = l.getC();
 
-    public  static BigInteger countIntervalLength(MyLine l, MyLine l1, MyLine l2) {
-        MyPoint2D firstPoint = findLinesIntersection(l, l1);
-        MyPoint2D secondPoint = findLinesIntersection(l, l2);
-        return countDistance(firstPoint, secondPoint);
+        BigInteger numerator = a.multiply(x).add(b.multiply(y)).add(c);
+        BigInteger denumerator = (a.pow(2)).add(b.pow(2));
+        BigDecimal num = new BigDecimal(numerator.pow(2));
+        BigDecimal denum = new BigDecimal(denumerator);
+        return num.divide(denum, RoundingMode.HALF_EVEN);// TODO rounding mode
     }
 
     public static float findAngleBetweenLines(MyLine l1, MyLine l2) {
         BigInteger a1 = l1.getA(), a2 = l2.getA();
         BigInteger b1 = l1.getB(), b2 = l2.getB();
-        BigInteger firstPart = ((a1.multiply(a2)).add(b1.multiply(b2)));
+
+        BigInteger numerator = ((a1.multiply(a2)).add(b1.multiply(b2)));
         BigInteger tmp1 = (a1.pow(2)).add(b1.pow(2));
         BigInteger tmp2 = (a2.pow(2)).add(b2.pow(2));
-        BigInteger secondPart = BigInteger.valueOf((long) (Math.sqrt(tmp1.longValue()) * Math.sqrt(tmp2.longValue())));
-        double cosAngle = firstPart.divide(secondPart).doubleValue();
-        return (float) Math.acos(cosAngle);
+        BigDecimal num = new BigDecimal(numerator.pow(2));
+        BigDecimal denum = new BigDecimal(tmp1.multiply(tmp2));
+        BigDecimal cos2Angle = num.divide(denum, RoundingMode.HALF_EVEN); // TODO rounding mode
+        float angle = (float) Math.acos(2 * cos2Angle.floatValue() - 1) / 2;
+        return angle;
     }
 }

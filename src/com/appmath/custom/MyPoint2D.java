@@ -7,8 +7,6 @@ public class MyPoint2D {
     private BigInteger x = BigInteger.ZERO;
     private BigInteger y = BigInteger.ZERO;
 
-    private final static BigInteger TWO = new BigInteger("2");
-
     public MyPoint2D(BigInteger x, BigInteger y) {
         this.x = x;
         this.y = y;
@@ -30,11 +28,10 @@ public class MyPoint2D {
         return y;
     }
 
-    public static BigInteger countDistance(MyPoint2D p1, MyPoint2D p2) {
+    public static BigInteger countSqrDistance(MyPoint2D p1, MyPoint2D p2) {
         BigInteger x1 = p1.getX(), x2 = p2.getX();
         BigInteger y1 = p1.getY(), y2 = p2.getY();
         BigInteger distance = (x1.min(x2)).pow(2).add((y1.min(y2)).pow(2));
-        long distanceLong = (long) Math.sqrt(distance.longValue());
-        return BigInteger.valueOf(distanceLong);
+        return distance;
     }
 }

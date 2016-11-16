@@ -41,7 +41,7 @@ public class MyFileWorker {
         StringBuilder sb = new StringBuilder();
         File file = new File(fileName);
         try {
-            BufferedReader in = new BufferedReader(new FileReader( file.getAbsoluteFile()));
+            BufferedReader in = new BufferedReader(new FileReader(file.getAbsoluteFile()));
             try {
                 String s;
                 while ((s = in.readLine()) != null) {
@@ -59,16 +59,16 @@ public class MyFileWorker {
         convertTextToPoints(resultText);
     }
 
-    private String convertPointsToText(MyPoint2D[] points) {
+    private String convertPointsToText(int[] points) {
         String text = new String();
         for (int i = 0; i < points.length; i++) {
-            text += '(' + points[i].getX().toString() + ',' + points[i].getY().toString() + ')' + '\n';
+            text += String.valueOf(points[i]) + ' ';
         }
 
         return text;
     }
 
-    public void writeDataFile(String outputFileName, MyPoint2D[] answerPoints) {
+    public void writeDataFile(String outputFileName, int[] answerPoints) {
         String answer = convertPointsToText(answerPoints);
         File file = new File(outputFileName);
         try {
