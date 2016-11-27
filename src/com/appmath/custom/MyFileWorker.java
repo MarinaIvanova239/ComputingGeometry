@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class MyFileWorker {
 
-    private ArrayList<MyPoint2D> points = new ArrayList<>();
+    private ArrayList<MyPoint2D> points = new ArrayList<MyPoint2D>();
 
     public ArrayList<MyPoint2D> getPoints() {
         return points;
