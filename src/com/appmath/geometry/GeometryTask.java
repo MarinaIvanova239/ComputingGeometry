@@ -125,24 +125,19 @@ public class GeometryTask {
     }
 
     private RectangleCharacteristics countRectangleCharacteristics(int indexOfBearingPoint) {
-        // find pair of calipers, which include endpoint
-        /*int bearingEndpoint = endpoints[indexOfBearingPoint];
-        int parallelBearingEndpointIndex = (indexOfBearingPoint < 2) ? indexOfBearingPoint + 2 : indexOfBearingPoint - 2;
-        MyPoint2D firstPoint = points.get(bearingEndpoint);
-        MyPoint2D secondPoint = bearingEndpoint > 0 ? points.get(bearingEndpoint - 1) : points.get(points.size() - 1);
+        MyLine firstLine = buildLineByTwoPoints(endpoints[indexOfBearingPoint], endpointsNext[indexOfBearingPoint]);
+        int secondPointIndex = (indexOfBearingPoint < 2) ? indexOfBearingPoint + 2 : indexOfBearingPoint - 2;
+        int thirdPointIndex = (indexOfBearingPoint % 2 == 0) ? 1 : 0;
+        MyLine secondLine = buildPerpendicularLineByOnePoint(firstLine, endpoints[thirdPointIndex]);
 
-         find pair of perpendicular calipers
-        int tmpEndpointIndex = (indexOfBearingPoint % 2 == 0) ? 1 : 0;
-        MyPoint2D perpendicularPoint = points.get(endpoints[tmpEndpointIndex]);
-
-         find rectangle's sides
-        BigDecimal firstSide = countDistanceBetweenLineAndPoint(bearingLine, parallelLinePoint);
-        BigDecimal secondSide = countDistanceBetweenLineAndPoint(perpendicularLine, perpendicularPoint);*/
+        // find sides of rectangle
+        BigInteger firstSide = countDistanceBetweenLineAndPoint(firstLine, endpoints[secondPointIndex]);
+        BigInteger secondSide = countDistanceBetweenLineAndPoint(secondLine, endpoints[thirdPointIndex + 2]);
 
         // count rectangle's square and perimeter
         RectangleCharacteristics rectangle = new RectangleCharacteristics();
-        rectangle.square = BigInteger.ONE;
-        rectangle.perimeter = BigInteger.ONE;
+        rectangle.square = firstSide.multiply(secondSide);
+        rectangle.perimeter = (firstSide.add(secondSide)).multiply(BigInteger.valueOf(2));
 
         return rectangle;
     }

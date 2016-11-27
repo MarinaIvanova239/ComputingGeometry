@@ -41,13 +41,6 @@ public class MyLine {
         return c;
     }
 
-    public static MyLine buildLineByOnePoint(MyPoint2D p, boolean directionToY) {
-        if (directionToY) {
-            return new MyLine(BigInteger.ONE, BigInteger.ZERO, p.getX().negate());
-        }
-        return new MyLine(BigInteger.ZERO, BigInteger.ONE, p.getY().negate());
-    }
-
     public static MyLine buildLineByTwoPoints(MyPoint2D p1, MyPoint2D p2) {
         BigInteger x1 = p1.getX(), x2 = p2.getX();
         BigInteger y1 = p1.getY(), y2 = p2.getY();
@@ -64,14 +57,12 @@ public class MyLine {
         return new MyLine(b, a.negate(), c);
     }
 
-    public static BigDecimal countDistanceBetweenLineAndPoint(MyLine l, MyPoint2D p) {
+    public static BigInteger countDistanceBetweenLineAndPoint(MyLine l, MyPoint2D p) {
         BigInteger x = p.getX(), y = p.getY();
         BigInteger a = l.getA(), b = l.getB(), c = l.getC();
 
         BigInteger numerator = a.multiply(x).add(b.multiply(y)).add(c);
         BigInteger denumerator = (a.pow(2)).add(b.pow(2));
-        BigDecimal num = new BigDecimal(numerator.pow(2));
-        BigDecimal denum = new BigDecimal(denumerator);
-        return num.divide(denum, RoundingMode.HALF_EVEN);// TODO rounding mode
+        return numerator.pow(2).divide(denumerator);
     }
 }
