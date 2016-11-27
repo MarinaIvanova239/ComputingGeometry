@@ -74,18 +74,4 @@ public class MyLine {
         BigDecimal denum = new BigDecimal(denumerator);
         return num.divide(denum, RoundingMode.HALF_EVEN);// TODO rounding mode
     }
-
-    public static float findAngleBetweenLines(MyLine l1, MyLine l2) {
-        BigInteger a1 = l1.getA(), a2 = l2.getA();
-        BigInteger b1 = l1.getB(), b2 = l2.getB();
-
-        BigInteger numerator = ((a1.multiply(a2)).add(b1.multiply(b2)));
-        BigInteger tmp1 = (a1.pow(2)).add(b1.pow(2));
-        BigInteger tmp2 = (a2.pow(2)).add(b2.pow(2));
-        BigDecimal num = new BigDecimal(numerator.pow(2));
-        BigDecimal denum = new BigDecimal(tmp1.multiply(tmp2));
-        BigDecimal cos2Angle = num.divide(denum, RoundingMode.HALF_EVEN); // TODO rounding mode
-        float angle = (float) Math.acos(2 * cos2Angle.floatValue() - 1) / 2;
-        return angle;
-    }
 }
