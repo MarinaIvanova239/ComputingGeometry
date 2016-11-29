@@ -43,7 +43,7 @@ public class MyLine {
         BigInteger x1 = p1.getX(), x2 = p2.getX();
         BigInteger y1 = p1.getY(), y2 = p2.getY();
         BigInteger a = y2.subtract(y1);
-        BigInteger b = x2.subtract(x1);
+        BigInteger b = x1.subtract(x2);
         BigInteger c = (y1.multiply(x2)).subtract(x1.multiply(y2));
         return new MyLine(a, b, c);
     }
@@ -59,7 +59,7 @@ public class MyLine {
         BigInteger x = p.getX(), y = p.getY();
         BigInteger a = l.getA(), b = l.getB(), c = l.getC();
 
-        BigInteger numerator = a.multiply(x).add(b.multiply(y)).add(c);
+        BigInteger numerator = (a.multiply(x).add(b.multiply(y)).add(c)).abs();
         BigInteger denumerator = (a.pow(2)).add(b.pow(2));
         return new MyFraction(numerator, denumerator);
     }
