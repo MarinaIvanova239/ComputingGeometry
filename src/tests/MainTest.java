@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainTest {
 
@@ -24,7 +25,6 @@ public class MainTest {
         points.add(new MyPoint2D(BigInteger.valueOf(8), BigInteger.valueOf(5)));
         points.add(new MyPoint2D(BigInteger.valueOf(5), BigInteger.valueOf(8)));
         points.add(new MyPoint2D(BigInteger.valueOf(2), BigInteger.valueOf(6)));
-        points.add(new MyPoint2D(BigInteger.valueOf(2), BigInteger.valueOf(4)));
 
         GeometryTask task = new GeometryTask();
         task.setPoints(points);
@@ -33,7 +33,10 @@ public class MainTest {
         int[] resultSquare = task.getAnswerForSquare();
         int[] resultPerimeter = task.getAnswerForPerimeter();
 
-        int[] expectedResult = {2, 1, 0, 3};
+        Arrays.sort(resultSquare);
+        Arrays.sort(resultPerimeter);
+
+        int[] expectedResult = {0, 2, 2, 3};
 
         for (int i = 0; i < points.size(); i++) {
             Assert.assertEquals(resultSquare[i], expectedResult[i]);
