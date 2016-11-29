@@ -1,8 +1,6 @@
 package com.appmath.custom;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 
 public class MyLine {
 
@@ -57,12 +55,12 @@ public class MyLine {
         return new MyLine(b, a.negate(), c);
     }
 
-    public static BigInteger countDistanceBetweenLineAndPoint(MyLine l, MyPoint2D p) {
+    public static MyFraction countDistanceBetweenLineAndPoint(MyLine l, MyPoint2D p) {
         BigInteger x = p.getX(), y = p.getY();
         BigInteger a = l.getA(), b = l.getB(), c = l.getC();
 
         BigInteger numerator = a.multiply(x).add(b.multiply(y)).add(c);
         BigInteger denumerator = (a.pow(2)).add(b.pow(2));
-        return numerator.pow(2).divide(denumerator);
+        return new MyFraction(numerator, denumerator);
     }
 }

@@ -1,9 +1,9 @@
 package com.appmath.geometry;
 
+import com.appmath.custom.MyFraction;
 import com.appmath.custom.MyLine;
 import com.appmath.custom.MyPoint2D;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -22,8 +22,8 @@ public class GeometryTask {
     private MyPoint2D[] endpointsNext = new MyPoint2D[NUMBER_RECTANGLE_POINTS];
 
     private class RectangleCharacteristics {
-        BigInteger square;
-        BigInteger perimeter;
+        MyFraction square = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+        MyFraction perimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
     }
 
     public void setPoints(ArrayList<MyPoint2D> points) {
@@ -50,24 +50,24 @@ public class GeometryTask {
             if (x.compareTo(minX) <= 0) {
                 endpoints[0] = points.get(i);
                 endpointsIndexes[0] = i;
-                endpointsNext[0] = (i == 0) ? points.get(pointsListSize - 1) : points.get(i - 1);
+                endpointsNext[0] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
                 minX = x;
             } else if (x.compareTo(maxX) >= 0) {
                 endpoints[2] = points.get(i);
                 endpointsIndexes[2] = i;
-                endpointsNext[2] = (i == 0) ? points.get(pointsListSize - 1) : points.get(i - 1);
+                endpointsNext[2] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
                 maxX = x;
             }
 
             if (y.compareTo(minY) <= 0) {
                 endpoints[1] = points.get(i);
                 endpointsIndexes[1] = i;
-                endpointsNext[1] = (i == 0) ? points.get(pointsListSize - 1) : points.get(i - 1);
+                endpointsNext[1] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
                 minY = y;
             } else if (y.compareTo(maxY) >= 0) {
                 endpoints[3] = points.get(i);
                 endpointsIndexes[3] = i;
-                endpointsNext[3] = (i == 0) ? points.get(pointsListSize - 1) : points.get(i - 1);
+                endpointsNext[3] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
                 maxY = y;
             }
         }
@@ -131,13 +131,16 @@ public class GeometryTask {
         MyLine secondLine = buildPerpendicularLineByOnePoint(firstLine, endpoints[thirdPointIndex]);
 
         // find sides of rectangle
-        BigInteger firstSide = countDistanceBetweenLineAndPoint(firstLine, endpoints[secondPointIndex]);
-        BigInteger secondSide = countDistanceBetweenLineAndPoint(secondLine, endpoints[thirdPointIndex + 2]);
+        MyFraction firstSide = countDistanceBetweenLineAndPoint(firstLine, endpoints[secondPointIndex]);
+        MyFraction secondSide = countDistanceBetweenLineAndPoint(secondLine, endpoints[thirdPointIndex + 2]);
 
         // count rectangle's square and perimeter
         RectangleCharacteristics rectangle = new RectangleCharacteristics();
-        rectangle.square = firstSide.multiply(secondSide);
-        rectangle.perimeter = (firstSide.add(secondSide)).multiply(BigInteger.valueOf(2));
+        rectangle.square.setNum(firstSide.getNum().multiply(secondSide.getNum()));
+        rectangle.square.setDenum(firstSide.getDenum());
+
+        rectangle.perimeter.setNum(firstSide.getNum().add(secondSide.getNum()).pow(2));
+        rectangle.perimeter.setDenum(firstSide.getDenum());
 
         return rectangle;
     }
@@ -146,26 +149,37 @@ public class GeometryTask {
         int numIterations = 0, numPoints = points.size();
         int minAngle = 1;
 
-        BigInteger minSquare = BigInteger.ZERO;
-        BigInteger minPerimeter = BigInteger.ZERO;
+        MyFraction minSquare = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+        MyFraction minPerimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
         int[] minSquarePoints = new int[NUMBER_RECTANGLE_POINTS];
         int[] minPerimeterPoints = new int[NUMBER_RECTANGLE_POINTS];
 
         findStartEndpoints();
+
+        // find endpoint with min angle and recount endpoint
+        minAngle = findMinAngle(minAngle);
+        endpoints[minAngle] = endpointsNext[minAngle];
+        endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ? 0 : endpointsIndexes[minAngle] + 1;
+        endpointsNext[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
+                points.get(0) : points.get(endpointsIndexes[minAngle] + 1);
 
         do {
             // find square and perimeter of current rectangle
             RectangleCharacteristics rect = countRectangleCharacteristics(minAngle);
 
             // save min square and min perimeter points
-            BigInteger rectSquare = rect.square;
-            BigInteger rectPerimeter = rect.perimeter;
-            if (rectSquare.compareTo(minSquare) < 0 || minSquare.equals(BigInteger.ZERO)) {
+            MyFraction rectSquare = rect.square;
+            MyFraction rectPerimeter = rect.perimeter;
+            if (minSquare.getNum().equals(BigInteger.ZERO) ||
+                    rectSquare.getNum().multiply(minSquare.getDenum())
+                            .compareTo(minSquare.getNum().multiply(rectSquare.getDenum())) < 0) {
                 minSquare = rectSquare;
                 System.arraycopy(endpointsIndexes, 0, minSquarePoints, 0, endpoints.length);
             }
 
-            if (rectPerimeter.compareTo(minPerimeter) < 0 || minPerimeter.equals(BigInteger.ZERO)) {
+            if (minPerimeter.getNum().equals(BigInteger.ZERO) ||
+                    rectPerimeter.getNum().multiply(minPerimeter.getDenum()).
+                            compareTo(minPerimeter.getNum().multiply(rectPerimeter.getDenum())) < 0) {
                 minPerimeter = rectPerimeter;
                 System.arraycopy(endpointsIndexes, 0, minPerimeterPoints, 0, endpoints.length);
             }
@@ -173,9 +187,9 @@ public class GeometryTask {
             // find endpoint with min angle and recount endpoint
             minAngle = findMinAngle(minAngle);
             endpoints[minAngle] = endpointsNext[minAngle];
-            endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == 0) ? points.size() - 1 : endpointsIndexes[minAngle] - 1;
-            endpointsNext[minAngle] = (endpointsIndexes[minAngle] == 0) ?
-                    points.get(points.size() - 1) : points.get(endpointsIndexes[minAngle] - 1);
+            endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ? 0 : endpointsIndexes[minAngle] + 1;
+            endpointsNext[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
+                    points.get(0) : points.get(endpointsIndexes[minAngle] + 1);
 
             // new iteration
             numIterations++;

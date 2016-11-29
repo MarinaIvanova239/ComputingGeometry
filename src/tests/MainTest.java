@@ -3,7 +3,6 @@ package tests;
 import com.appmath.custom.MyPoint2D;
 import com.appmath.geometry.GeometryTask;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
