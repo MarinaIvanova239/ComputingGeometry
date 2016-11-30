@@ -76,7 +76,7 @@ public class GeometryTask {
     private MyPoint2D countTriangleSquare(MyPoint2D p, MyPoint2D v1, MyPoint2D v2) {
         BigInteger x1 = p.getX(), y1 = p.getY();
         BigInteger x2 = v1.getX().add(x1), y2 = v1.getY().add(y1);
-        BigInteger x3 = v2.getX().add(x1), y3 = v2.getY().add(y2);
+        BigInteger x3 = v2.getX().add(x1), y3 = v2.getY().add(y1);
 
         BigInteger square = x1.multiply(y2).subtract(x2.multiply(y1))
                 .add(x3.multiply(y1).subtract(x1.multiply(y3)))
@@ -96,8 +96,8 @@ public class GeometryTask {
                 endpointsNext[numPrevMinAngle].getY().subtract(endpoints[numPrevMinAngle].getY()));
 
         pointIndex = pointIndex < NUMBER_RECTANGLE_POINTS - 1 ? pointIndex + 1 : 0;
-        MyPoint2D v2 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()).negate(),
-                endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()));
+        MyPoint2D v2 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()),
+                endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()).negate());
 
         MyPoint2D v = countTriangleSquare(bearingPoint, v1, v2);
         if (v.equals(v1))
@@ -114,7 +114,7 @@ public class GeometryTask {
             minAngleIndex = pointIndex;
 
         pointIndex = pointIndex < NUMBER_RECTANGLE_POINTS - 1 ? pointIndex + 1 : 0;
-        MyPoint2D v4 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()),
+        MyPoint2D v4 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()).negate(),
                 endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()));
 
         v = countTriangleSquare(bearingPoint, v, v4);

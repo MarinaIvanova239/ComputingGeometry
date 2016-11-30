@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 public class MainTest {
 
+    private static final int NUMBER_RECTANGLE_POINTS = 4;
+
     private ArrayList<MyPoint2D> points = new ArrayList<MyPoint2D>();
 
     @BeforeMethod
@@ -25,6 +27,7 @@ public class MainTest {
         points.add(new MyPoint2D(BigInteger.valueOf(8), BigInteger.valueOf(5)));
         points.add(new MyPoint2D(BigInteger.valueOf(5), BigInteger.valueOf(8)));
         points.add(new MyPoint2D(BigInteger.valueOf(2), BigInteger.valueOf(6)));
+        points.add(new MyPoint2D(BigInteger.valueOf(2), BigInteger.valueOf(4)));
 
         GeometryTask task = new GeometryTask();
         task.setPoints(points);
@@ -36,9 +39,9 @@ public class MainTest {
         Arrays.sort(resultSquare);
         Arrays.sort(resultPerimeter);
 
-        int[] expectedResult = {0, 2, 2, 3};
+        int[] expectedResult = {0, 2, 3, 4};
 
-        for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
             Assert.assertEquals(resultSquare[i], expectedResult[i]);
             Assert.assertEquals(resultPerimeter[i], expectedResult[i]);
         }
