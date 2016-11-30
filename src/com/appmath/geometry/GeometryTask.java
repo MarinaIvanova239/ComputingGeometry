@@ -22,8 +22,13 @@ public class GeometryTask {
     private MyPoint2D[] endpointsNext = new MyPoint2D[NUMBER_RECTANGLE_POINTS];
 
     private class RectangleCharacteristics {
-        MyFraction square = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
-        MyFraction perimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+        MyFraction square;
+        MyFraction perimeter;
+
+        RectangleCharacteristics() {
+            square = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+            perimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+        }
     }
 
     public void setPoints(ArrayList<MyPoint2D> points) {
@@ -38,6 +43,12 @@ public class GeometryTask {
         return answerForPerimeter;
     }
 
+    private void setEndpointsValue(int index, int num, int pointsListSize) {
+        endpoints[index] = points.get(num);
+        endpointsIndexes[index] = num;
+        endpointsNext[index] = (num == pointsListSize - 1) ? points.get(0) : points.get(num + 1);
+    }
+
     private void findStartEndpoints() {
         int pointsListSize = points.size();
         BigInteger minX = points.get(0).getX(), maxX = points.get(0).getX();
@@ -47,27 +58,20 @@ public class GeometryTask {
             MyPoint2D point = points.get(i);
             BigInteger x = point.getX();
             BigInteger y = point.getY();
+
             if (x.compareTo(minX) <= 0) {
-                endpoints[0] = points.get(i);
-                endpointsIndexes[0] = i;
-                endpointsNext[0] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
+                setEndpointsValue(0, i, pointsListSize);
                 minX = x;
             } else if (x.compareTo(maxX) >= 0) {
-                endpoints[2] = points.get(i);
-                endpointsIndexes[2] = i;
-                endpointsNext[2] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
+                setEndpointsValue(2, i, pointsListSize);
                 maxX = x;
             }
 
             if (y.compareTo(minY) <= 0) {
-                endpoints[1] = points.get(i);
-                endpointsIndexes[1] = i;
-                endpointsNext[1] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
+                setEndpointsValue(1, i, pointsListSize);
                 minY = y;
             } else if (y.compareTo(maxY) >= 0) {
-                endpoints[3] = points.get(i);
-                endpointsIndexes[3] = i;
-                endpointsNext[3] = (i == pointsListSize - 1) ? points.get(0) : points.get(i + 1);
+                setEndpointsValue(3, i, pointsListSize);
                 maxY = y;
             }
         }
@@ -78,6 +82,7 @@ public class GeometryTask {
         BigInteger x2 = v1.getX().add(x1), y2 = v1.getY().add(y1);
         BigInteger x3 = v2.getX().add(x1), y3 = v2.getY().add(y1);
 
+        // count determinant
         BigInteger square = x1.multiply(y2).subtract(x2.multiply(y1))
                 .add(x3.multiply(y1).subtract(x1.multiply(y3)))
                 .add(x2.multiply(y3).subtract(x3.multiply(y2)));
@@ -92,31 +97,38 @@ public class GeometryTask {
 
         MyPoint2D bearingPoint = endpoints[numPrevMinAngle];
 
+        // find vector which contains bearing endpoint
         MyPoint2D v1 = new MyPoint2D(endpointsNext[numPrevMinAngle].getX().subtract(endpoints[numPrevMinAngle].getX()),
                 endpointsNext[numPrevMinAngle].getY().subtract(endpoints[numPrevMinAngle].getY()));
 
+        // find vector which contains next endpoint
         pointIndex = pointIndex < NUMBER_RECTANGLE_POINTS - 1 ? pointIndex + 1 : 0;
         MyPoint2D v2 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()),
                 endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()).negate());
 
+        // find which of them forms smaller angle
         MyPoint2D v = countTriangleSquare(bearingPoint, v1, v2);
         if (v.equals(v1))
             minAngleIndex = numPrevMinAngle;
         else
             minAngleIndex = pointIndex;
 
+        // find vector which contains third endpoint
         pointIndex = pointIndex < NUMBER_RECTANGLE_POINTS - 1 ? pointIndex + 1 : 0;
         MyPoint2D v3 = new MyPoint2D(endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()).negate(),
                 endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()).negate());
 
+        // compare angles
         v = countTriangleSquare(bearingPoint, v, v3);
         if (v.equals(v3))
             minAngleIndex = pointIndex;
 
+        // vector with forth endpoint
         pointIndex = pointIndex < NUMBER_RECTANGLE_POINTS - 1 ? pointIndex + 1 : 0;
         MyPoint2D v4 = new MyPoint2D(endpointsNext[pointIndex].getY().subtract(endpoints[pointIndex].getY()).negate(),
                 endpointsNext[pointIndex].getX().subtract(endpoints[pointIndex].getX()));
 
+        // compare angles
         v = countTriangleSquare(bearingPoint, v, v4);
         if (v.equals(v4))
             minAngleIndex = pointIndex;
@@ -159,7 +171,8 @@ public class GeometryTask {
         // find endpoint with min angle and recount endpoint
         minAngle = findMinAngle(minAngle);
         endpoints[minAngle] = endpointsNext[minAngle];
-        endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ? 0 : endpointsIndexes[minAngle] + 1;
+        endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
+                0 : endpointsIndexes[minAngle] + 1;
         endpointsNext[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
                 points.get(0) : points.get(endpointsIndexes[minAngle] + 1);
 
@@ -187,7 +200,8 @@ public class GeometryTask {
             // find endpoint with min angle and recount endpoint
             minAngle = findMinAngle(minAngle);
             endpoints[minAngle] = endpointsNext[minAngle];
-            endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ? 0 : endpointsIndexes[minAngle] + 1;
+            endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
+                    0 : endpointsIndexes[minAngle] + 1;
             endpointsNext[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
                     points.get(0) : points.get(endpointsIndexes[minAngle] + 1);
 
