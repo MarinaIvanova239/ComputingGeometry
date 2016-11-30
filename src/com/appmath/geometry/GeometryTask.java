@@ -186,15 +186,27 @@ public class GeometryTask {
             if (minSquare.getNum().equals(BigInteger.ZERO) ||
                     rectSquare.getNum().multiply(minSquare.getDenum())
                             .compareTo(minSquare.getNum().multiply(rectSquare.getDenum())) < 0) {
+
                 minSquare = rectSquare;
-                System.arraycopy(endpointsIndexes, 0, minSquarePoints, 0, endpoints.length);
+                for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
+                    if (i >= minAngle)
+                        minSquarePoints[i - minAngle] = endpointsIndexes[i];
+                    else
+                        minSquarePoints[i + NUMBER_RECTANGLE_POINTS - minAngle] = endpointsIndexes[i];
+                }
             }
 
             if (minPerimeter.getNum().equals(BigInteger.ZERO) ||
                     rectPerimeter.getNum().multiply(minPerimeter.getDenum()).
                             compareTo(minPerimeter.getNum().multiply(rectPerimeter.getDenum())) < 0) {
+
                 minPerimeter = rectPerimeter;
-                System.arraycopy(endpointsIndexes, 0, minPerimeterPoints, 0, endpoints.length);
+                for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
+                    if (i >= minAngle)
+                        minPerimeterPoints[i - minAngle] = endpointsIndexes[i];
+                    else
+                        minPerimeterPoints[i + NUMBER_RECTANGLE_POINTS - minAngle] = endpointsIndexes[i];
+                }
             }
 
             // find endpoint with min angle and recount endpoint

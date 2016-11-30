@@ -36,10 +36,7 @@ public class MainTest {
         int[] resultSquare = task.getAnswerForSquare();
         int[] resultPerimeter = task.getAnswerForPerimeter();
 
-        Arrays.sort(resultSquare);
-        Arrays.sort(resultPerimeter);
-
-        int[] expectedResult = {0, 2, 3, 4};
+        int[] expectedResult = {2, 3, 4, 0};
 
         for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
             Assert.assertEquals(resultSquare[i], expectedResult[i]);
