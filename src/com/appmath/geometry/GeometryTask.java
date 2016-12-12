@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import static com.appmath.custom.MyLine.*;
+import static java.math.BigInteger.ONE;
 
 public class GeometryTask {
 
@@ -26,8 +27,8 @@ public class GeometryTask {
         MyFraction perimeter;
 
         RectangleCharacteristics() {
-            square = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
-            perimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+            square = new MyFraction(BigInteger.ZERO, ONE);
+            perimeter = new MyFraction(BigInteger.ZERO, ONE);
         }
     }
 
@@ -54,7 +55,11 @@ public class GeometryTask {
         BigInteger minX = points.get(0).getX(), maxX = points.get(0).getX();
         BigInteger minY = points.get(0).getY(), maxY = points.get(0).getY();
 
-        for (int i = 0; i < pointsListSize; i++) {
+        for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
+            setEndpointsValue(i, 0, pointsListSize);
+        }
+
+        for (int i = 1; i < pointsListSize; i++) {
             MyPoint2D point = points.get(i);
             BigInteger x = point.getX();
             BigInteger y = point.getY();
@@ -137,7 +142,9 @@ public class GeometryTask {
     }
 
     private RectangleCharacteristics countRectangleCharacteristics(int indexOfBearingPoint) {
-        MyLine firstLine = buildLineByTwoPoints(endpoints[indexOfBearingPoint], endpointsNext[indexOfBearingPoint]);
+        int indexOfPrevPoint = (endpointsIndexes[indexOfBearingPoint] == 0) ?
+                points.size() - 1 : endpointsIndexes[indexOfBearingPoint] - 1;
+        MyLine firstLine = buildLineByTwoPoints(endpoints[indexOfBearingPoint], points.get(indexOfPrevPoint));
         int secondPointIndex = (indexOfBearingPoint < 2) ? indexOfBearingPoint + 2 : indexOfBearingPoint - 2;
         int thirdPointIndex = (indexOfBearingPoint % 2 == 0) ? 1 : 0;
         MyLine secondLine = buildPerpendicularLineByOnePoint(firstLine, endpoints[thirdPointIndex]);
@@ -161,14 +168,13 @@ public class GeometryTask {
         int numIterations = 0, numPoints = points.size();
         int minAngle = 1;
 
-        MyFraction minSquare = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
-        MyFraction minPerimeter = new MyFraction(BigInteger.ZERO, BigInteger.ONE);
+        MyFraction minSquare = new MyFraction(BigInteger.ONE, BigInteger.ONE.negate());
+        MyFraction minPerimeter = new MyFraction(BigInteger.ONE, BigInteger.ONE.negate());
         int[] minSquarePoints = new int[NUMBER_RECTANGLE_POINTS];
         int[] minPerimeterPoints = new int[NUMBER_RECTANGLE_POINTS];
 
         findStartEndpoints();
 
-        // find endpoint with min angle and recount endpoint
         minAngle = findMinAngle(minAngle);
         endpoints[minAngle] = endpointsNext[minAngle];
         endpointsIndexes[minAngle] = (endpointsIndexes[minAngle] == points.size() - 1) ?
@@ -183,9 +189,11 @@ public class GeometryTask {
             // save min square and min perimeter points
             MyFraction rectSquare = rect.square;
             MyFraction rectPerimeter = rect.perimeter;
-            if (minSquare.getNum().equals(BigInteger.ZERO) ||
+
+
+            if ( (!rectSquare.getNum().equals(BigInteger.ZERO) &&
                     rectSquare.getNum().multiply(minSquare.getDenum())
-                            .compareTo(minSquare.getNum().multiply(rectSquare.getDenum())) < 0) {
+                            .compareTo(minSquare.getNum().multiply(rectSquare.getDenum())) < 0)) {
 
                 minSquare = rectSquare;
                 for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
@@ -196,9 +204,10 @@ public class GeometryTask {
                 }
             }
 
-            if (minPerimeter.getNum().equals(BigInteger.ZERO) ||
+            if ( (!rectPerimeter.getNum().equals(BigInteger.ZERO) &&
+                    !rectSquare.getNum().equals(BigInteger.ZERO) &&
                     rectPerimeter.getNum().multiply(minPerimeter.getDenum()).
-                            compareTo(minPerimeter.getNum().multiply(rectPerimeter.getDenum())) < 0) {
+                            compareTo(minPerimeter.getNum().multiply(rectPerimeter.getDenum())) < 0)) {
 
                 minPerimeter = rectPerimeter;
                 for (int i = 0; i < NUMBER_RECTANGLE_POINTS; i++) {
